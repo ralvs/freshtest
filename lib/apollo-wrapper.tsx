@@ -1,0 +1,43 @@
+'use client'
+
+import { ApolloLink, HttpLink } from '@apollo/client'
+import { loadErrorMessages, loadDevMessages } from '@apollo/client/dev'
+import {
+  NextSSRApolloClient,
+  ApolloNextAppProvider,
+  NextSSRInMemoryCache,
+  SSRMultipartLink,
+} from '@apollo/experimental-nextjs-app-support/ssr'
+// import { setVerbosity } from "ts-invariant";
+
+if (process.env.NODE_ENV === 'development') {
+  // setVerbosity("debug");
+  loadDevMessages()
+  loadErrorMessages()
+}
+
+function makeClient() {
+  const httpLink = new HttpLink({
+    uri: 'https://cms.trial-task.k8s.ext.fcse.io/graphql',
+  })
+
+  return new NextSSRApolloClient({
+    cache: new NextSSRInMemoryCache(),
+    link:
+      typeof window === 'undefined'
+        ? ApolloLink.from([
+            // in a SSR environment, if you use multipart features like
+            // @defer, you need to decide how to handle these.
+            // This strips all interfaces with a `@defer` directive from your queries.
+            new SSRMultipartLink({
+              stripDefer: true,
+            }),
+            httpLink,
+          ])
+        : httpLink,
+  })
+}
+
+export function ApolloWrapper({ children }: React.PropsWithChildren) {
+  return <ApolloNextAppProvider makeClient={makeClient}>{children}</ApolloNextAppProvider>
+}
