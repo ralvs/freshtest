@@ -8,7 +8,6 @@ const { COOKIE_NAME, JWT_SECRET } = process.env
 
 export function setTokenCookie(userId: string, jwtToken: string) {
   const token = jwt.sign({ userId, jwtToken }, JWT_SECRET!)
-  console.log('🚀 ~ token:', token)
 
   const params = {
     name: COOKIE_NAME!,
@@ -39,6 +38,7 @@ export async function checkTokenCookie(ck: RequestCookie | undefined) {
     return undefined
   }
 
+  // does not work at next.js middleware
   // try {
   //   const { userId, jwtToken } = jwt.verify(ck.value, JWT_SECRET!) as { userId: string; jwtToken: string }
   //   return { userId, jwtToken }

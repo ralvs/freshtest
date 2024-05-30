@@ -1,6 +1,6 @@
 import { Typography } from '@mui/material'
 
-const Home = async () => {
+const Home = () => {
   return (
     <>
       <Typography variant='h2'>Welcome!</Typography>

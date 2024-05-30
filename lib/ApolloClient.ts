@@ -1,11 +1,14 @@
-import { ApolloClient, HttpLink, InMemoryCache, ApolloLink, type NormalizedCacheObject } from '@apollo/client'
+// based on https://github.com/apollographql/apollo-client-nextjs
+// its a experimental version supporting RSC
+
+import { HttpLink } from '@apollo/client'
 import { setContext } from '@apollo/client/link/context'
-import { registerApolloClient } from '@apollo/experimental-nextjs-app-support/rsc'
+import { registerApolloClient, ApolloClient, InMemoryCache } from '@apollo/experimental-nextjs-app-support'
 import { cookies } from 'next/headers'
 
 import { checkTokenCookie } from './helpers'
 
-export const { getClient } = registerApolloClient(() => {
+export const { getClient, query, PreloadQuery } = registerApolloClient(() => {
   const httpLink = new HttpLink({
     uri: 'https://cms.trial-task.k8s.ext.fcse.io/graphql',
     credentials: 'include', // This sends cookies to the server
@@ -24,10 +27,8 @@ export const { getClient } = registerApolloClient(() => {
     }
   })
 
-  const link = ApolloLink.from([authLink, httpLink])
-
-  return new ApolloClient<NormalizedCacheObject>({
+  return new ApolloClient({
     cache: new InMemoryCache(),
-    link,
+    link: authLink.concat(httpLink),
   })
 })

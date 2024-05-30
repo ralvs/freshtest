@@ -3,9 +3,9 @@ import { Box, Button, Paper, TextField, Typography } from '@mui/material'
 import { cookies } from 'next/headers'
 
 import { logoutAction } from '@/actions/actions'
-import { getClient } from '@/lib/client'
+import { getClient } from '@/lib/ApolloClient'
+import { type User } from '@/lib/graphqlTypes'
 import { checkTokenCookie } from '@/lib/helpers'
-import { type User } from '@/lib/types'
 
 export const dynamic = 'force-dynamic'
 
@@ -27,7 +27,6 @@ const styles = {
     alignItems: 'center',
     gap: 4,
     margin: 'auto',
-    width: 300,
   },
 
   paper: {
@@ -35,6 +34,7 @@ const styles = {
     display: 'flex',
     flexDirection: 'column',
     gap: 4,
+    width: 250,
   },
 }
 

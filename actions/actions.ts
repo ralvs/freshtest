@@ -4,65 +4,60 @@ import { gql } from '@apollo/client'
 import { revalidatePath } from 'next/cache'
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
-import { z } from 'zod'
 
-import { getClient } from '@/lib/client'
+import { getClient } from '@/lib/ApolloClient'
+import { type LoginType } from '@/lib/graphqlTypes'
 import { setTokenCookie } from '@/lib/helpers'
-import { type LoginType } from '@/lib/types'
 
-const LoginSchema = z.object({
-  email: z.string().email(),
-  password: z.string(),
-})
+import { LoginSchema, type LoginSchemaType } from './schemas'
 
-type TypeOfSchema = z.infer<typeof LoginSchema>
-
-export const loginAction = async (data: FormData) => {
-  // console.log('🚀 ~ data:', data)
-  // export const loginAction = async (data: TypeOfSchema) => {
+export const loginAction = async (data: LoginSchemaType) => {
   // validate the data again
-  // const result = LoginSchema.safeParse(data)
+  const result = LoginSchema.safeParse(data)
 
-  // if (result.error) {
-  //   console.log(`${Date()} --->>>`, result.error.format())
-  //   return { success: false, error: 'There was an error in the data sent. Please try again.' }
-  // }
+  if (result.error) {
+    console.log(`${Date()} --->>>`, result.error.format()) // for logging porpuses
+    const errorMessages = result.error.errors.map(error => error.message)
+    return { success: false, error: errorMessages.join(', ') }
+  }
 
   // run login mutation on GraphQL
-  const answer = (await getClient()
-    .mutate({
-      mutation: gql`
-        mutation SIGNIN($identifier: String!, $password: String!) {
-          login(input: { identifier: $identifier, password: $password }) {
-            jwt
-            user {
-              id
-            }
-          }
+  const LOGIN = gql`
+    mutation SIGNIN($identifier: String!, $password: String!) {
+      login(input: { identifier: $identifier, password: $password }) {
+        jwt
+        user {
+          id
         }
-      `,
+      }
+    }
+  `
+
+  try {
+    const answer = (await getClient().mutate({
+      mutation: LOGIN,
       variables: {
-        identifier: 'test@freshcells.de', //result.data.email,
-        password: 'KTKwXm2grV4wHzW', // result.data.password,
+        identifier: result.data.email,
+        password: result.data.password,
+        // identifier: 'test@freshcells.de', // for testing and dont have to type every time
+        // password: 'KTKwXm2grV4wHzW',
       },
-    })
-    .catch(err => console.log(err))) as LoginType
+    })) as LoginType
 
-  console.log('🚀 ~ answer login:', answer)
+    if (!answer || !answer.data || !answer.data.login) return { success: false, error: 'Nothing found' }
 
-  if (!answer || !answer.data || !answer.data.login)
-    return { success: false, message: 'Something went wrong with the login. Please try again' }
+    const cookieData = setTokenCookie(answer.data.login.user.id, answer.data.login.jwt)
+    cookies().set(cookieData)
+  } catch (err) {
+    return { success: false, error: 'Email or password invalid. Please try again' }
+  }
 
-  const cookieData = setTokenCookie(answer.data.login.user.id, answer.data.login.jwt)
-  cookies().set(cookieData)
-
-  revalidatePath('/login')
   redirect('/profile')
 }
 
 export const logoutAction = async () => {
   cookies().delete(process.env.COOKIE_NAME!)
 
-  revalidatePath('/')
-  redirect('/')
+  revalidatePath('/profile')
+  redirect('/login')
 }
