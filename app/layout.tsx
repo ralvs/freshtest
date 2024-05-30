@@ -1,6 +1,13 @@
+import { Container } from '@mui/material'
+import { AppRouterCacheProvider } from '@mui/material-nextjs/v14-appRouter'
 import { GeistSans } from 'geist/font/sans'
+import NextTopLoader from 'nextjs-toploader'
+import { Toaster } from 'react-hot-toast'
 
-// import { ApolloWrapper } from '@/lib/apollo-wrapper'
+import { ThemeProvider } from '@mui/material/styles'
+
+import TopNav from '@/components/TopNav'
+import theme from '@/lib/theme'
 
 export const metadata = {
   title: 'Fresh Test App',
@@ -8,14 +15,40 @@ export const metadata = {
   icons: [{ rel: 'icon', url: '/favicon.ico' }],
 }
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+const RootLayout = ({ children }: { children: React.ReactNode }) => {
   return (
     <html lang='en'>
       <body className={GeistSans.className}>
-        {/* <ApolloWrapper> */}
-        {children}
-        {/* </ApolloWrapper> */}
+        <NextTopLoader color='#ff6f61' />
+        <Toaster
+          position='top-center'
+          toastOptions={{
+            duration: 3000,
+            style: { padding: '16px' },
+            // like the notistack package
+            success: {
+              style: { color: 'white', background: '#43a047' },
+              iconTheme: { primary: 'white', secondary: '#43a047' },
+            },
+            error: {
+              style: { color: 'white', background: '#d32f2f' },
+              iconTheme: { primary: 'white', secondary: '#d32f2f' },
+            },
+          }}
+        />
+
+        <AppRouterCacheProvider>
+          <ThemeProvider theme={theme}>
+            <TopNav />
+
+            <Container maxWidth='md' component='main' sx={{ pt: 4 }}>
+              {children}
+            </Container>
+          </ThemeProvider>
+        </AppRouterCacheProvider>
       </body>
     </html>
   )
 }
+
+export default RootLayout

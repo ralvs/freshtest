@@ -1,15 +1,17 @@
 import { gql } from '@apollo/client'
-import Link from 'next/link'
+import { Box, Button, Paper, TextField, Typography } from '@mui/material'
+import { cookies } from 'next/headers'
 
 import { logoutAction } from '@/actions/actions'
 import { getClient } from '@/lib/client'
-import { type MeType } from '@/lib/types'
+import { checkTokenCookie } from '@/lib/helpers'
+import { type User } from '@/lib/types'
 
 export const dynamic = 'force-dynamic'
 
 const USER = gql`
-  query someuser {
-    user(id: 2) {
+  query USER($id: ID!) {
+    user(id: $id) {
       id
       firstName
       lastName
@@ -17,22 +19,46 @@ const USER = gql`
   }
 `
 
+const styles = {
+  container: {
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: 4,
+    margin: 'auto',
+    width: 300,
+  },
+
+  paper: {
+    p: 4,
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 4,
+  },
+}
+
 const Profile = async () => {
-  const { data } = await getClient().query<{ data: MeType }>({ query: USER })
+  const cookie = cookies().get(process.env.COOKIE_NAME!)
+  const user = await checkTokenCookie(cookie)
+
+  const { data } = await getClient().query<{ user: User }>({ query: USER, variables: { id: user?.userId } })
 
   return (
-    <div>
-      <Link href='/'>Home</Link>
-      <br />
-      <br />
+    <Box sx={styles.container}>
+      <Typography variant='h3'>Profile</Typography>
 
-      <h1>Profile</h1>
-      <p>{JSON.stringify(data)}</p>
+      <Paper elevation={4} sx={styles.paper}>
+        <TextField fullWidth label='First Name' defaultValue={data.user?.firstName} disabled />
+        <TextField fullWidth label='Last Name' defaultValue={data.user?.lastName} disabled />
+      </Paper>
 
       <form action={logoutAction}>
-        <button type='submit'>Logout</button>
+        <Button type='submit' variant='contained'>
+          Logout
+        </Button>
       </form>
-    </div>
+    </Box>
   )
 }
 
