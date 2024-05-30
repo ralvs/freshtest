@@ -8,6 +8,12 @@ export const env = createEnv({
    */
   server: {
     NODE_ENV: z.enum(['development', 'test', 'production']),
+    COOKIE_NAME: z.string().refine(val => val !== undefined, {
+      message: 'COOKIE_NAME must be a non-null string',
+    }),
+    JWT_SECRET: z.string().refine(val => val !== undefined, {
+      message: 'JWT_SECRET must be a non-null string',
+    }),
   },
 
   /**
@@ -25,6 +31,8 @@ export const env = createEnv({
    */
   runtimeEnv: {
     NODE_ENV: process.env.NODE_ENV,
+    COOKIE_NAME: process.env.COOKIE_NAME,
+    JWT_SECRET: process.env.JWT_SECRET,
     // NEXT_PUBLIC_CLIENTVAR: process.env.NEXT_PUBLIC_CLIENTVAR,
   },
   /**

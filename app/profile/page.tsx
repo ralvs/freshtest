@@ -7,25 +7,18 @@ import { type MeType } from '@/lib/types'
 
 export const dynamic = 'force-dynamic'
 
-const ME = gql`
-  query myself {
-    me {
+const USER = gql`
+  query someuser {
+    user(id: 2) {
       id
-      username
+      firstName
+      lastName
     }
   }
 `
-// const SOME = gql`
-//   query someuser {
-//     user(id: 2) {
-//       id
-//       username
-//     }
-//   }
-// `
 
 const Profile = async () => {
-  const { data } = await getClient().query<{ data: MeType }>({ query: ME })
+  const { data } = await getClient().query<{ data: MeType }>({ query: USER })
 
   return (
     <div>

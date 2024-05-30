@@ -7,6 +7,7 @@ import { redirect } from 'next/navigation'
 import { z } from 'zod'
 
 import { getClient } from '@/lib/client'
+import { setTokenCookie } from '@/lib/helpers'
 import { type LoginType } from '@/lib/types'
 
 const LoginSchema = z.object({
@@ -34,6 +35,9 @@ export const loginAction = async (data: FormData) => {
         mutation SIGNIN($identifier: String!, $password: String!) {
           login(input: { identifier: $identifier, password: $password }) {
             jwt
+            user {
+              id
+            }
           }
         }
       `,
@@ -44,26 +48,21 @@ export const loginAction = async (data: FormData) => {
     })
     .catch(err => console.log(err))) as LoginType
 
-  console.log('🚀 ~ answer:', answer)
-  if (!answer) throw Error('Something went wrong with the login. Please try again')
+  console.log('🚀 ~ answer login:', answer)
 
-  // set cookie with JWT
-  cookies().set({
-    name: 'freshcells',
-    value: answer.data ? answer.data.login.jwt : '',
-    httpOnly: true,
-    expires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7),
-    path: '/',
-    // secure: true, // only for https
-  })
+  if (!answer || !answer.data || !answer.data.login)
+    return { success: false, message: 'Something went wrong with the login. Please try again' }
+
+  const cookieData = setTokenCookie(answer.data.login.user.id, answer.data.login.jwt)
+  cookies().set(cookieData)
 
   revalidatePath('/login')
   redirect('/profile')
 }
 
 export const logoutAction = async () => {
-  cookies().delete('freshcells')
+  cookies().delete(process.env.COOKIE_NAME!)
 
-  revalidatePath('/profile')
+  revalidatePath('/')
   redirect('/')
 }

@@ -2,22 +2,24 @@
 import { cookies } from 'next/headers'
 import Link from 'next/link'
 
-export default function Home() {
-  // Review: check JWT
-  const ck = cookies().get('freshcells')
+import { checkTokenCookie } from '@/lib/helpers'
+
+export default async function Home() {
+  const cookie = cookies().get(process.env.COOKIE_NAME!)
+  const user = await checkTokenCookie(cookie)
 
   return (
     <main>
       <h1>Welcome!</h1>
 
-      {ck ? (
+      {user ? (
         <>
           <h3>you are logged</h3>
           <Link href='/profile'>Your profile</Link>
         </>
       ) : (
         <>
-          <h3>Please go login</h3>
+          <p>Please go login</p>
           <Link href='/login'>Access</Link>
         </>
       )}

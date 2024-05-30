@@ -1,17 +1,20 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
-export function middleware(request: NextRequest) {
+import { checkTokenCookie } from './lib/helpers'
+
+export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
 
   // Check if the request is for the /profile URL
   if (pathname.startsWith('/profile')) {
     // Example authentication check
     // You can customize this part based on how you manage authentication
-    const token = request.cookies.get('freshcells')?.value
+    const cookie = request.cookies.get(process.env.COOKIE_NAME!)
+    const user = await checkTokenCookie(cookie)
 
-    if (!token) {
-      // If no token, redirect to login page
+    if (!user) {
+      // If no user, redirect to login page
       const loginUrl = new URL('/login', request.url)
       return NextResponse.redirect(loginUrl)
     }

@@ -1,8 +1,14 @@
+import Link from 'next/link'
+
 import { loginAction } from '@/actions/actions'
 
 const Login = () => {
   return (
     <div>
+      <Link href='/'>Home</Link>
+      <br />
+      <br />
+
       <h1>Login</h1>
       <br />
       <br />
