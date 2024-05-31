@@ -2,6 +2,7 @@
 
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Box, Button, Paper, TextField, Typography } from '@mui/material'
+import { useRouter } from 'next/navigation'
 import { useForm, Controller } from 'react-hook-form'
 import toast from 'react-hot-toast'
 
@@ -29,6 +30,8 @@ const styles = {
 }
 
 const Login = () => {
+  const router = useRouter()
+
   const {
     control,
     handleSubmit,
@@ -44,10 +47,12 @@ const Login = () => {
 
   const onSubmit = handleSubmit(async (data: LoginSchemaType) => {
     const result = await loginAction(data)
-    console.log('🚀 ~ result:', result)
 
-    if (result?.error) toast.error(result?.error)
-    else toast.success('Welcome back!')
+    if (!result.success) toast.error(result.msg)
+    else {
+      toast.success(result.msg)
+      router.push('/profile')
+    }
   })
 
   return (

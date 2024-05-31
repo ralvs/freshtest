@@ -1,5 +1,4 @@
 import { Button, Tooltip } from '@mui/material'
-import { cookies } from 'next/headers'
 import Link from 'next/link'
 
 import Avatar from '@mui/material/Avatar'
@@ -7,7 +6,7 @@ import Container from '@mui/material/Container'
 import Divider from '@mui/material/Divider'
 import Typography from '@mui/material/Typography'
 
-import { checkTokenCookie } from '@/lib/helpers'
+import { verifyUserCookie } from '@/lib/helpers'
 
 const sx = {
   navContainer: {
@@ -19,8 +18,7 @@ const sx = {
 }
 
 const TopNav = async () => {
-  const cookie = cookies().get(process.env.COOKIE_NAME!)
-  const user = await checkTokenCookie(cookie)
+  const user = await verifyUserCookie()
 
   return (
     <nav>

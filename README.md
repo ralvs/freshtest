@@ -25,17 +25,22 @@ Account screen should contain 2 non-editable text fields displaying logged-in us
 Clicking the logout button should logout the user and switch the application to the login screen.
 
 
-## My choises?
+## My choises
 
 I choose to use Next.js v14 because of it's powerfull set of features, like App Router, and also because it supports the new React Server Components and React Server Actions.<br>
 Combined with Reac Hook Form and Zod, make them an incredible stack.
 
-#### *Attention: every request has a forced delay of 1 or 2 seconds to simulate a real network*
+Some more explanations:
+- middleware.ts from Next.js runs on every request and is protecting the /profile route, allowing only logged users
+- use mostly React Server Components
+- ApolloClient is the most famous but still has experimental support for RSC
+
 
 ## How to test on your machine?
 
 Please clone this repository and run the folloing commands:
 
 `npm install`<br>
+`cp .env.example .env`<br>
 `npm run build`<br>
 `npm run start`

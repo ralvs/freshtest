@@ -1,11 +1,10 @@
 import { gql } from '@apollo/client'
 import { Box, Button, Paper, TextField, Typography } from '@mui/material'
-import { cookies } from 'next/headers'
 
 import { logoutAction } from '@/actions/actions'
 import { getClient } from '@/lib/ApolloClient'
 import { type User } from '@/lib/graphqlTypes'
-import { checkTokenCookie } from '@/lib/helpers'
+import { verifyUserCookie } from '@/lib/helpers'
 
 export const dynamic = 'force-dynamic'
 
@@ -39,9 +38,7 @@ const styles = {
 }
 
 const Profile = async () => {
-  const cookie = cookies().get(process.env.COOKIE_NAME!)
-  const user = await checkTokenCookie(cookie)
-
+  const user = await verifyUserCookie()
   const { data } = await getClient().query<{ user: User }>({ query: USER, variables: { id: user?.userId } })
 
   return (

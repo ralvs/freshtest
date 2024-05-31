@@ -1,5 +1,6 @@
 import { jwtVerify } from 'jose' // this library is supported by next.js middleware
 import jwt from 'jsonwebtoken'
+import { cookies } from 'next/headers'
 
 export const simulateDelay = (duration: number) => new Promise(resolve => setTimeout(resolve, duration))
 
@@ -22,12 +23,9 @@ export function setTokenCookie(userId: string, jwtToken: string) {
   return params
 }
 
-type RequestCookie = {
-  name: string
-  value: string
-}
+export async function verifyUserCookie() {
+  const ck = cookies().get(process.env.COOKIE_NAME!)
 
-export async function checkTokenCookie(ck: RequestCookie | undefined) {
   if (!ck) return undefined
 
   try {

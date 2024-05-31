@@ -18,7 +18,7 @@ export const loginAction = async (data: LoginSchemaType) => {
   if (result.error) {
     console.log(`${Date()} --->>>`, result.error.format()) // for logging porpuses
     const errorMessages = result.error.errors.map(error => error.message)
-    return { success: false, error: errorMessages.join(', ') }
+    return { success: false, msg: errorMessages.join(', ') }
   }
 
   // run login mutation on GraphQL
@@ -39,20 +39,24 @@ export const loginAction = async (data: LoginSchemaType) => {
       variables: {
         identifier: result.data.email,
         password: result.data.password,
-        // identifier: 'test@freshcells.de', // for testing and dont have to type every time
+        // for testing and dont have to type every time. In a real repository, this would be in a .env file
+        // identifier: 'test@freshcells.de',
         // password: 'KTKwXm2grV4wHzW',
       },
     })) as LoginType
 
-    if (!answer || !answer.data || !answer.data.login) return { success: false, error: 'Nothing found' }
+    if (!answer || !answer.data || !answer.data.login) return { success: false, msg: 'Nothing found' }
 
     const cookieData = setTokenCookie(answer.data.login.user.id, answer.data.login.jwt)
     cookies().set(cookieData)
+
+    return { success: true, msg: 'Login successful' }
   } catch (err) {
-    return { success: false, error: 'Email or password invalid. Please try again' }
+    return { success: false, msg: 'Email or password invalid. Please try again' }
   }
 
-  redirect('/profile')
+  // this works fine but output some errors in the browser console because its a Client Component and client does not really get a response
+  // redirect('/profile')
 }
 
 export const logoutAction = async () => {

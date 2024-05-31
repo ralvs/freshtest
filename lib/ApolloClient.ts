@@ -4,9 +4,8 @@
 import { HttpLink } from '@apollo/client'
 import { setContext } from '@apollo/client/link/context'
 import { registerApolloClient, ApolloClient, InMemoryCache } from '@apollo/experimental-nextjs-app-support'
-import { cookies } from 'next/headers'
 
-import { checkTokenCookie } from './helpers'
+import { verifyUserCookie } from './helpers'
 
 export const { getClient, query, PreloadQuery } = registerApolloClient(() => {
   const httpLink = new HttpLink({
@@ -15,8 +14,7 @@ export const { getClient, query, PreloadQuery } = registerApolloClient(() => {
   })
 
   const authLink = setContext(async (_, { headers }) => {
-    const cookie = cookies().get(process.env.COOKIE_NAME!)
-    const user = await checkTokenCookie(cookie)
+    const user = await verifyUserCookie()
 
     return {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment

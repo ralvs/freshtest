@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
-import { checkTokenCookie } from './lib/helpers'
+import { verifyUserCookie } from './lib/helpers'
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
@@ -9,8 +9,7 @@ export async function middleware(request: NextRequest) {
   if (pathname.startsWith('/profile')) {
     // Example authentication check
     // You can customize this part based on how you manage authentication
-    const cookie = request.cookies.get(process.env.COOKIE_NAME!)
-    const user = await checkTokenCookie(cookie)
+    const user = await verifyUserCookie()
 
     if (!user) {
       // If no user, redirect to login page
